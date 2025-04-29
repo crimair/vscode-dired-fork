@@ -51,6 +51,10 @@ export default class FileItem {
         this._selected = value;
     }
 
+    get isSelected(): boolean {
+        return this._selected;
+    }
+
     get path(): string {
         return path.join(this._dirname, this._filename);
     }
@@ -74,26 +78,38 @@ export default class FileItem {
     }
 
     public static parseLine(dir: string, line: string): FileItem {
+        if (line.length < 52) {
+            throw new Error("Line is too short to parse as a FileItem");
+        }
         const filename = line.substring(52);
-        const username = line.substring(13, 13 + 8);
-        const groupname = line.substring(22, 22 + 8);
-        const size = parseInt(line.substring(31, 31 + 8));
-        const month = parseInt(line.substring(40, 40 + 2));
-        const day = parseInt(line.substring(43, 43 + 2));
-        const hour = parseInt(line.substring(46, 46 + 2));
-        const min = parseInt(line.substring(49, 49 + 2));
+        const username = line.substring(13, 13 + 8).trim();
+        const groupname = line.substring(22, 22 + 8).trim();
+        const sizeStr = line.substring(31, 31 + 8).trim();
+        const size = parseInt(sizeStr);
+        const monthStr = line.substring(40, 40 + 2);
+        const month = parseInt(monthStr);
+        const dayStr = line.substring(43, 43 + 2);
+        const day = parseInt(dayStr);
+        const hourStr = line.substring(46, 46 + 2);
+        const hour = parseInt(hourStr);
+        const minStr = line.substring(49, 49 + 2);
+        const min = parseInt(minStr);
         const modeStr = line.substring(2, 2 + 10);
-        const isDirectory = (modeStr.substring(0, 0 + 1) === "d");
+        const isDirectory = (modeStr.substring(0, 1) === "d");
         const isFile = (modeStr.substring(0, 1) === "-");
         const isSelected = (line.substring(0, 1) === "*");
+
+        if (isNaN(size) || isNaN(month) || isNaN(day) || isNaN(hour) || isNaN(min)) {
+            throw new Error(`Failed to parse numeric values from line: ${line}`);
+        }
 
         return new FileItem(
             dir,
             filename,
             isDirectory,
             isFile,
-            username,
-            groupname,
+            username || undefined,
+            groupname || undefined,
             size,
             month,
             day,

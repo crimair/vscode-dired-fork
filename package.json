@@ -1,16 +1,16 @@
 {
-  "name": "vscode-dired",
-  "displayName": "vscode-dired",
-  "description": "dired(File Manager) for VSCode, like Emacs",
-  "version": "0.0.9",
-  "publisher": "rrudi",
+  "name": "vscode-dired-fork",
+  "displayName": "vscode-dired-fork",
+  "description": "Forked dired(File Manager) for VSCode, like Emacs",
+  "version": "0.1.0",
+  "publisher": "crimair",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shirou/vscode-dired"
+    "url": "https://github.com/crimair/vscode-dired-fork"
   },
   "bugs": {
-    "url": "https://github.com/shirou/vscode-dired/issues"
+    "url": "https://github.com/crimair/vscode-dired-fork/issues"
   },
   "engines": {
     "vscode": "^1.65.0"
@@ -31,6 +31,10 @@
       {
         "command": "extension.dired.open",
         "title": "Open dired buffer"
+      },
+      {
+        "command": "extension.dired.unselectAll",
+        "title": "Unselect All Marked Items"
       }
     ],
     "keybindings": [
@@ -42,62 +46,67 @@
       {
         "key": "ctrl+x f",
         "command": "extension.dired.open",
-        "when": "editorTextFocus && !inDebugRepl"
+        "when": "dired.open && editorTextFocus && !inDebugRepl"
       },
       {
         "key": "enter",
         "command": "extension.dired.enter",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "shift+=",
         "command": "extension.dired.createDir",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "ctrl+x =",
         "command": "extension.dired.createFile",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "shift+r",
         "command": "extension.dired.rename",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "shift+d",
         "command": "extension.dired.delete",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "shift+c",
         "command": "extension.dired.copy",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "shift+b",
         "command": "extension.dired.goUpDir",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "m",
         "command": "extension.dired.select",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "u",
         "command": "extension.dired.unselect",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+      },
+      {
+        "key": "shift+u",
+        "command": "extension.dired.unselectAll",
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "g",
         "command": "extension.dired.refresh",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       },
       {
         "key": "q",
         "command": "extension.dired.close",
-        "when": "dired.open && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
       }
     ],
     "languages": [
@@ -129,6 +138,16 @@
           "type": "boolean",
           "default": "true",
           "description": "Ask directory on opening dired."
+        },
+        "dired.useQuickPickInput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Quick Pick based input with path completion for commands like open, rename, and copy."
+        },
+        "dired.setInitialPathInInput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set the current item's path as the initial value in the input box for rename and copy commands."
         }
       }
     }

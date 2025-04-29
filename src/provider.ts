@@ -94,9 +94,48 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
             return;
         }
         if (this.dirname) {
-            const n = path.join(this.dirname, newName);
+            const sourcePath = f.path;
+            let targetPath: string;
+
+            // Determine the absolute target path
+            if (path.isAbsolute(newName)) {
+                targetPath = newName; // Use the absolute path directly
+            } else {
+                targetPath = path.resolve(this.dirname, newName); // Resolve relative path based on current dir
+            }
+
+            try {
+                let finalTargetPath = targetPath;
+
+                // Check if the target path exists and is a directory
+                try {
+                    const targetStats = fs.statSync(targetPath);
+                    if (targetStats.isDirectory()) {
+                        // If target is a directory, move the source *into* it
+                        finalTargetPath = path.join(targetPath, path.basename(sourcePath));
+                    }
+                    // If target exists but is not a directory, fs.renameSync will likely throw an error.
+                } catch (targetStatErr: any) {
+                    if (targetStatErr.code !== 'ENOENT') {
+                        // If error is something other than "not found", re-throw it
+                        throw targetStatErr;
+                    }
+                    // Target path doesn't exist, proceed with renaming/moving to finalTargetPath.
+                }
+
+                // Ensure the target directory exists before moving the file/directory
+                const targetDir = path.dirname(finalTargetPath);
+                if (!fs.existsSync(targetDir)) {
+                    fs.mkdirSync(targetDir, { recursive: true });
+                }
+
+                fs.renameSync(sourcePath, finalTargetPath);
+                vscode.window.showInformationMessage(`${f.fileName} is moved to ${finalTargetPath}`);
+            } catch (err: any) {
+                vscode.window.showErrorMessage(`Failed to move ${f.fileName} to ${targetPath}: ${err.message}`);
+            }
+
             this.reload();
-            vscode.window.showInformationMessage(`${f.fileName} is renamed to ${n}`);
         }
     }
 
@@ -106,22 +145,262 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
             return;
         }
         if (this.dirname) {
-            const n = path.join(this.dirname, newName);
-            vscode.window.showInformationMessage(`${f.fileName} is copied to ${n}`);
+            const sourcePath = f.path;
+            let targetPath: string;
+
+            // Determine the absolute target path
+            if (path.isAbsolute(newName)) {
+                targetPath = newName; // Use the absolute path directly
+            } else {
+                targetPath = path.resolve(this.dirname, newName); // Resolve relative path based on current dir
+            }
+
+            try {
+                const sourceStats = fs.statSync(sourcePath);
+                let finalTargetPath = targetPath;
+
+                // Check if the target path exists and is a directory
+                try {
+                    const targetStats = fs.statSync(targetPath);
+                    if (targetStats.isDirectory()) {
+                        // If target is a directory, append the source basename
+                        finalTargetPath = path.join(targetPath, path.basename(sourcePath));
+                    }
+                    // If target exists but is not a directory, fs.copyFileSync/cpSync will likely throw an error later.
+                } catch (targetStatErr: any) {
+                     if (targetStatErr.code !== 'ENOENT') {
+                        // If error is something other than "not found", re-throw it
+                        throw targetStatErr;
+                    }
+                    // Target path doesn't exist, proceed.
+                }
+
+                if (sourceStats.isDirectory()) {
+                    // Copy directory recursively
+                    fs.cpSync(sourcePath, finalTargetPath, { recursive: true });
+                } else {
+                    // Copy file
+                    const targetDir = path.dirname(finalTargetPath);
+                    if (!fs.existsSync(targetDir)) {
+                         fs.mkdirSync(targetDir, { recursive: true });
+                    }
+                    fs.copyFileSync(sourcePath, finalTargetPath);
+                }
+                vscode.window.showInformationMessage(`${f.fileName} is copied to ${finalTargetPath}`);
+            } catch (err: any) {
+                vscode.window.showErrorMessage(`Failed to copy ${f.fileName} to ${targetPath}: ${err.message}`);
+            }
+
+            this.reload();
         }
+    }
+
+    // Add the new copyMultiple method here
+    copyMultiple(targetDir: string, items: FileItem[]) {
+        if (!this.dirname) {
+            return;
+        }
+
+        let targetPath: string;
+        // Determine the absolute target path
+        if (path.isAbsolute(targetDir)) {
+            targetPath = targetDir; // Use the absolute path directly
+        } else {
+            targetPath = path.resolve(this.dirname, targetDir); // Resolve relative path based on current dir
+        }
+
+        try {
+            // Ensure the target directory exists
+            if (!fs.existsSync(targetPath)) {
+                fs.mkdirSync(targetPath, { recursive: true });
+            } else if (!fs.statSync(targetPath).isDirectory()) {
+                vscode.window.showErrorMessage(`Target path ${targetPath} exists but is not a directory.`);
+                return;
+            }
+
+            let successCount = 0;
+            let errorCount = 0;
+            const errors: string[] = [];
+
+            for (const item of items) {
+                const sourcePath = item.path;
+                const finalTargetPath = path.join(targetPath, item.fileName);
+
+                try {
+                    const sourceStats = fs.statSync(sourcePath);
+                    if (sourceStats.isDirectory()) {
+                        fs.cpSync(sourcePath, finalTargetPath, { recursive: true });
+                    } else {
+                        fs.copyFileSync(sourcePath, finalTargetPath);
+                    }
+                    successCount++;
+                } catch (err: any) {
+                    errorCount++;
+                    errors.push(`Failed to copy ${item.fileName}: ${err.message}`);
+                    console.error(`Failed to copy ${sourcePath} to ${finalTargetPath}:`, err);
+                }
+            }
+
+            if (errorCount > 0) {
+                vscode.window.showErrorMessage(`Copied ${successCount} items, but failed to copy ${errorCount} items. Check console for details.`);
+                errors.forEach(e => console.error(e)); // Log specific errors
+            } else {
+                vscode.window.showInformationMessage(`Successfully copied ${successCount} items to ${targetPath}`);
+            }
+
+        } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to prepare target directory ${targetPath}: ${err.message}`);
+        }
+
+        this.reload();
+    }
+
+    // Add the new moveMultiple method here
+    moveMultiple(targetDir: string, items: FileItem[]) {
+        if (!this.dirname) {
+            return;
+        }
+
+        let targetPath: string;
+        // Determine the absolute target path
+        if (path.isAbsolute(targetDir)) {
+            targetPath = targetDir; // Use the absolute path directly
+        } else {
+            targetPath = path.resolve(this.dirname, targetDir); // Resolve relative path based on current dir
+        }
+
+        try {
+            // Ensure the target directory exists
+            if (!fs.existsSync(targetPath)) {
+                fs.mkdirSync(targetPath, { recursive: true });
+            } else if (!fs.statSync(targetPath).isDirectory()) {
+                vscode.window.showErrorMessage(`Target path ${targetPath} exists but is not a directory.`);
+                return;
+            }
+
+            let successCount = 0;
+            let errorCount = 0;
+            const errors: string[] = [];
+
+            for (const item of items) {
+                const sourcePath = item.path;
+                const finalTargetPath = path.join(targetPath, item.fileName);
+
+                try {
+                    // Prevent moving directory into itself or file onto itself (though unlikely here)
+                    if (sourcePath === finalTargetPath || sourcePath === targetPath) {
+                        errors.push(`Skipping move: source and destination are the same for ${item.fileName}`);
+                        errorCount++;
+                        continue;
+                    }
+                    fs.renameSync(sourcePath, finalTargetPath);
+                    successCount++;
+                } catch (err: any) {
+                    errorCount++;
+                    errors.push(`Failed to move ${item.fileName}: ${err.message}`);
+                    console.error(`Failed to move ${sourcePath} to ${finalTargetPath}:`, err);
+                }
+            }
+
+            if (errorCount > 0) {
+                vscode.window.showErrorMessage(`Moved ${successCount} items, but failed to move ${errorCount} items. Check console for details.`);
+                errors.forEach(e => console.error(e)); // Log specific errors
+            } else {
+                vscode.window.showInformationMessage(`Successfully moved ${successCount} items to ${targetPath}`);
+            }
+
+        } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to prepare target directory ${targetPath}: ${err.message}`);
+        }
+
+        this.reload();
+    }
+
+    // Add the new getSelectedItems method here
+    getSelectedItems(): FileItem[] {
+        const selectedItems: FileItem[] = [];
+        const at = vscode.window.activeTextEditor;
+        if (!at || !this.dirname) {
+            return selectedItems;
+        }
+        const doc = at.document;
+        if (!doc || doc.uri.scheme !== DiredProvider.scheme) {
+            return selectedItems;
+        }
+
+        for (let i = 1; i < doc.lineCount; i++) { // Start from line 1 to skip header
+            const lineText = doc.lineAt(i).text;
+            try {
+                const fileItem = FileItem.parseLine(this.dirname, lineText);
+                if (fileItem.isSelected) {
+                    selectedItems.push(fileItem);
+                }
+            } catch (e) {
+                // Ignore lines that cannot be parsed
+                console.warn(`Could not parse line ${i}: ${lineText}`, e);
+            }
+        }
+        return selectedItems;
     }
 
     delete() {
         const f = this.getFile();
         if (!f) {
+            vscode.window.showWarningMessage("No file or directory under cursor to delete.");
             return;
         }
         if (this.dirname) {
             const n = path.join(this.dirname, f.fileName);
-            fs.unlinkSync(n);
-            this.reload();
-            vscode.window.showInformationMessage(`${n} was deleted`);
+            try {
+                const stats = fs.statSync(n);
+                if (stats.isDirectory()) {
+                    fs.rmSync(n, { recursive: true, force: true });
+                } else {
+                    fs.unlinkSync(n);
+                }
+                this.reload();
+                vscode.window.showInformationMessage(`${f.fileName} was deleted`);
+            } catch (err: any) {
+                 vscode.window.showErrorMessage(`Failed to delete ${f.fileName}: ${err.message}`);
+            }
         }
+    }
+
+    // Add the new deleteMultiple method
+    async deleteMultiple(items: FileItem[]) {
+        if (!this.dirname) {
+            return;
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+        const errors: string[] = [];
+
+        for (const item of items) {
+            const itemPath = item.path; // Use the full path from FileItem
+            try {
+                const stats = fs.statSync(itemPath);
+                if (stats.isDirectory()) {
+                    fs.rmSync(itemPath, { recursive: true, force: true });
+                } else {
+                    fs.unlinkSync(itemPath);
+                }
+                successCount++;
+            } catch (err: any) {
+                errorCount++;
+                errors.push(`Failed to delete ${item.fileName}: ${err.message}`);
+                console.error(`Failed to delete ${itemPath}:`, err);
+            }
+        }
+
+        if (errorCount > 0) {
+            vscode.window.showErrorMessage(`Deleted ${successCount} items, but failed to delete ${errorCount} items. Check console for details.`);
+            errors.forEach(e => console.error(e)); // Log specific errors
+        } else {
+            vscode.window.showInformationMessage(`Successfully deleted ${successCount} items.`);
+        }
+
+        this.reload(); // Refresh the view after deletions
     }
 
     select() {
@@ -130,6 +409,40 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
 
     unselect() {
         this.selectFiles(false);
+    }
+
+    unselectAll() {
+        if (!this.dirname) {
+            return;
+        }
+        const at = vscode.window.activeTextEditor;
+        if (!at) {
+            return;
+        }
+        const doc = at.document;
+        if (!doc || doc.uri.scheme !== DiredProvider.scheme) {
+            return;
+        }
+
+        let changed = false;
+        for (let i = 1; i < this._buffers.length; i++) { // Start from 1 to skip header
+            try {
+                const f = FileItem.parseLine(this.dirname, this._buffers[i]);
+                if (f.isSelected) {
+                    f.select(false);
+                    this._buffers[i] = f.line();
+                    changed = true;
+                }
+            } catch (e) {
+                // Ignore lines that cannot be parsed
+                console.warn(`Could not parse line ${i} for unselectAll: ${this._buffers[i]}`, e);
+            }
+        }
+
+        if (changed) {
+            const uri = this.uri;
+            this._onDidChange.fire(uri);
+        }
     }
 
     goUpDir() {
@@ -167,6 +480,15 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
 
     provideTextDocumentContent(uri: vscode.Uri): string | Thenable<string> {
         return this.render();
+    }
+
+    /**
+     * Gets the full path of the file/directory under the cursor.
+     * Returns undefined if the cursor is not on a valid file/directory line.
+     */
+    public getPathUnderCursor(): string | undefined {
+        const fileItem = this.getFile();
+        return fileItem?.path;
     }
 
     private get uri(): vscode.Uri {

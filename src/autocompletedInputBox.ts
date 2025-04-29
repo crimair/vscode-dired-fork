@@ -27,11 +27,13 @@ export async function autocompletedInputBox<T>(
     const quickPick = vscode.window.createQuickPick();
     quickPick.canSelectMany = false;
     let disposables: vscode.Disposable[] = [];
-    let result = quickPick.value;
+    let result: string | undefined = undefined; // Initialize result to undefined
+    let accepted = false; // Flag to track if accepted via Enter
+
     if (processSelf !== undefined)
         processSelf(quickPick);
 
-    let makeTask = () => new Promise<void>(resolve => {
+    let makeTask = () => new Promise<string | undefined>(resolve => { // Return type includes undefined
         disposables.push(
             quickPick.onDidChangeValue(directoryOrFile => {
                 quickPick.items = Array.from(completionFunc(quickPick.value))
@@ -40,22 +42,28 @@ export async function autocompletedInputBox<T>(
             quickPick.onDidAccept(() => {
                 if (finishCondition(quickPick)) {
                     result = quickPick.value;
+                    accepted = true; // Mark as accepted
                     quickPick.hide();
-                    resolve();
+                    // Don't resolve here, let onDidHide handle resolution
                 }
             }),
             quickPick.onDidHide(() => {
                 quickPick.dispose();
-                resolve();
+                if (accepted) {
+                    resolve(result); // Resolve with the accepted value
+                } else {
+                    resolve(undefined); // Resolve with undefined if cancelled (e.g., Esc)
+                }
             })
         );
         quickPick.show();
     });
+
     try {
-        await makeTask();
+        result = await makeTask(); // Assign the resolved value (string or undefined)
     }
     finally {
         disposables.forEach(d => d.dispose());
     }
-    return quickPick.value;
+    return result; // Return the final result (string or undefined)
 }
