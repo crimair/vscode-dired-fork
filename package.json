@@ -35,6 +35,10 @@
       {
         "command": "extension.dired.unselectAll",
         "title": "Unselect All Marked Items"
+      },
+      {
+        "command": "extension.dired.pathLevelUp",
+        "title": "Remove one path level (for autocompletedInputBox)"
       }
     ],
     "keybindings": [
@@ -107,6 +111,11 @@
         "key": "q",
         "command": "extension.dired.close",
         "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+      },
+      {
+        "key": "ctrl+h",
+        "command": "extension.dired.pathLevelUp",
+        "when": "autocompletedInputBox.active"
       }
     ],
     "languages": [

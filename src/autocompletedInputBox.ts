@@ -1,5 +1,41 @@
 import * as vscode from 'vscode';
 
+// Global management of QuickPick instances
+let currentActiveQuickPick: vscode.QuickPick<vscode.QuickPickItem> | null = null;
+
+export function getCurrentQuickPick(): vscode.QuickPick<vscode.QuickPickItem> | null {
+    return currentActiveQuickPick;
+}
+
+// Path level removal logic
+export function removePathLevel(path: string): string {
+    if (!path.includes('/')) {
+        return ''; // Return empty string if no '/' found
+    }
+    
+    // Remove trailing '/' before processing
+    let trimmedPath = path.endsWith('/') ? path.slice(0, -1) : path;
+    
+    if (trimmedPath === '') {
+        return ''; // Return empty string if already empty
+    }
+    
+    if (trimmedPath === '/') {
+        return ''; // Return empty string for root directory
+    }
+    
+    const lastSlashIndex = trimmedPath.lastIndexOf('/');
+    if (lastSlashIndex === -1) {
+        return ''; // Return empty string if no '/' found
+    }
+    
+    if (lastSlashIndex === 0) {
+        return '/'; // Return root for paths at root level
+    }
+    
+    return trimmedPath.substring(0, lastSlashIndex + 1);
+}
+
 export function defaultFinishCondition(self: vscode.QuickPick<vscode.QuickPickItem>) {
     if (self.selectedItems.length == 0 || self.selectedItems[0].label == self.value) {
         return true;
@@ -26,6 +62,11 @@ export async function autocompletedInputBox<T>(
 
     const quickPick = vscode.window.createQuickPick();
     quickPick.canSelectMany = false;
+    
+    // Register QuickPick instance globally and set context key
+    currentActiveQuickPick = quickPick;
+    vscode.commands.executeCommand('setContext', 'autocompletedInputBox.active', true);
+    
     let disposables: vscode.Disposable[] = [];
     let result: string | undefined = undefined; // Initialize result to undefined
     let accepted = false; // Flag to track if accepted via Enter
@@ -48,6 +89,10 @@ export async function autocompletedInputBox<T>(
                 }
             }),
             quickPick.onDidHide(() => {
+                // Clean up QuickPick instance and disable context key
+                currentActiveQuickPick = null;
+                vscode.commands.executeCommand('setContext', 'autocompletedInputBox.active', false);
+                
                 quickPick.dispose();
                 if (accepted) {
                     resolve(result); // Resolve with the accepted value

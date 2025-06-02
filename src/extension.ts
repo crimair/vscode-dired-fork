@@ -6,7 +6,7 @@ import FileItem from './fileItem';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { autocompletedInputBox } from './autocompletedInputBox';
+import { autocompletedInputBox, getCurrentQuickPick, removePathLevel } from './autocompletedInputBox';
 
 export interface ExtensionInternal {
     DiredProvider: DiredProvider,
@@ -357,9 +357,16 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
     });
     const commandUnselectAll = vscode.commands.registerCommand("extension.dired.unselectAll", () => {
         provider.unselectAll();
-    });
-    const commandClose = vscode.commands.registerCommand("extension.dired.close", () => {
+    });    const commandClose = vscode.commands.registerCommand("extension.dired.close", () => {
         vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    });    const commandPathLevelUp = vscode.commands.registerCommand("extension.dired.pathLevelUp", () => {
+        const quickPick = getCurrentQuickPick();
+        if (quickPick) {
+            const currentValue = quickPick.value;
+            const newValue = removePathLevel(currentValue);
+            quickPick.value = newValue;
+            // onDidChangeValue event will automatically fire and update completion candidates
+        }
     });
 
     const commandCreateFile = vscode.commands.registerCommand("extension.dired.createFile", async () => {
@@ -401,9 +408,7 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
             }
         }
         // If fileName is undefined (cancelled), do nothing.
-    });
-
-    context.subscriptions.push(
+    });    context.subscriptions.push(
         provider,
         commandOpen,
         commandEnter,
@@ -419,6 +424,7 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
         commandSelect,
         commandUnselect,
         commandUnselectAll,
+        commandPathLevelUp,
         providerRegistrations
     );
 
