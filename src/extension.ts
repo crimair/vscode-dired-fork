@@ -80,34 +80,39 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
             } catch {
                 return;
             }
-        }
-
-        try {
+        }        try {
+            const dirItems: vscode.QuickPickItem[] = [];
+            const fileItems: vscode.QuickPickItem[] = [];
+            
             for (let name of fs.readdirSync(dirname)) {
                 const fullpath = path.join(dirname, name);
                 try {
                     const stat = fs.statSync(fullpath); // Get stat to check type
                     if (stat.isDirectory()) {
-                        // Yield directory if type is 'all' or 'directory'
+                        // Add directory if type is 'all' or 'directory'
                         if (completionType === 'all' || completionType === 'directory') {
-                            yield {
+                            dirItems.push({
                                 label: fullpath, detail: "Open " + name + "/",
                                 buttons: [ { iconPath: vscode.ThemeIcon.Folder } ]
-                            };
+                            });
                         }
                     } else {
-                        // Yield file only if type is 'all' or 'file'
+                        // Add file only if type is 'all' or 'file'
                         if (completionType === 'all' || completionType === 'file') {
-                            yield {
+                            fileItems.push({
                                 label: fullpath, detail: "Open " + name,
                                 buttons: [ { iconPath: vscode.ThemeIcon.File } ]
-                            };
+                            });
                         }
                     }
                 } catch (statErr) {
                     // Ignore files we can't stat
                 }
             }
+            
+            // Yield directories first, then files
+            for (const item of dirItems) yield item;
+            for (const item of fileItems) yield item;
         } catch (readDirErr) {
             // Ignore errors reading directory
         }
