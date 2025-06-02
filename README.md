@@ -42,6 +42,7 @@ Default keybindings (when the dired buffer is focused):
 - `shift+u` (`U`): Unmark (unselect) all marked items.
 - `g`: Refresh the current directory contents.
 - `q`: Close the dired buffer.
+- `ctrl+h`: Remove one path level in Quick Pick input (only active when using path completion).
 
 ## LICENSE
 
