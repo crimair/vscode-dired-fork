@@ -10,6 +10,7 @@ This is a fork of the original [vscode-dired](https://github.com/shirou/vscode-d
 
 - Keyboard-driven file management.
 - Open files or directories.
+- When opening a directory, the cursor is restored to the previous position if it is within the valid range; otherwise, it moves to the first line.
 - Create, rename, copy, move, and delete files and directories.
 - Mark multiple items for batch operations (rename/move, copy, delete).
 - Toggle visibility of dotfiles.
@@ -32,7 +33,7 @@ Default keybindings (when the dired buffer is focused):
 - `enter`: Open the file or directory under the cursor.
 - `.` : Toggle visibility of dotfiles (files starting with '.').
 - `shift+=` (`+`): Create a new directory.
-- `ctrl+x =`: Create a new file. Uses Quick Pick input if enabled.
+- `ctrl+x =` or `shift+n` (`N`): Create a new file. Both keys perform the same action. Uses Quick Pick input if enabled.
 - `shift+r` (`R`): Rename the item under the cursor or move selected items to a new directory. Uses Quick Pick input if enabled.
 - `shift+c` (`C`): Copy the item under the cursor or copy selected items to a new directory. Uses Quick Pick input if enabled.
 - `shift+d` (`D`): Delete the item under the cursor or delete selected items (with confirmation).
