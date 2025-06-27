@@ -10,6 +10,10 @@ import * as autoBox from './autocompletedInputBox'
 const FIXED_URI: vscode.Uri = vscode.Uri.parse('dired://fixed_window');
 
 export default class DiredProvider implements vscode.TextDocumentContentProvider {
+    // ディレクトリごとのカーソル位置保存用
+    private _cursorPositions: { [dir: string]: number } = {};
+
+    // ディレクトリごとのカーソル位置保存用
     static scheme = 'dired'; // ex: dired://<directory>
 
     private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
@@ -19,6 +23,20 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
 
     constructor(fixed_window: boolean) {
         this._fixed_window = fixed_window;
+        // カーソル位置監視イベント登録
+        vscode.window.onDidChangeTextEditorSelection(e => {
+            const editor = e.textEditor;
+            const doc = editor.document;
+            if (doc && doc.uri.scheme === DiredProvider.scheme) {
+                const dirLine = doc.lineAt(0).text;
+                const dir = dirLine.endsWith(":") ? dirLine.slice(0, -1) : dirLine;
+                const line = editor.selection.active.line;
+                // 0行目（ヘッダ）は除外
+                if (line > 0) {
+                    this._cursorPositions[dir] = line;
+                }
+            }
+        });
     }
 
     dispose() {
@@ -463,10 +481,21 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
                     vscode.window.showTextDocument(
                         doc,
                         this.getTextDocumentShowOptions(true)
-                    );
-                    vscode.languages.setTextDocumentLanguage(doc, "dired");
-                }
-                );
+                    ).then(editor => {
+                        // カーソル位置復元処理
+                        const lineCount = doc.lineCount;
+                        let targetLine = 0;
+                        const saved = this._cursorPositions[path];
+                        if (typeof saved === "number" && saved > 0 && saved < lineCount) {
+                            targetLine = saved;
+                        }
+                        const newSelection = new vscode.Selection(targetLine, 0, targetLine, 0);
+                        editor.selection = newSelection;
+                        editor.revealRange(new vscode.Range(targetLine, 0, targetLine, 0));
+                        // 言語モード設定
+                        vscode.languages.setTextDocumentLanguage(doc, "dired");
+                    });
+                });
         }
     }
 
