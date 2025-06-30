@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-06-30
+
+### Added
+- Sorting is now available in dired view. You can toggle the sort method with the `s` key.
+
+### Fixed
+- The "dired open" command now works correctly.
+
 ## [0.1.2] - 2025-06-28
 
 ### Added

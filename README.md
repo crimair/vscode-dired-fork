@@ -32,6 +32,7 @@ Default keybindings (when the dired buffer is focused):
 - `ctrl+x f`: Open dired. Prompts for a directory or file path.
 - `enter`: Open the file or directory under the cursor.
 - `.` : Toggle visibility of dotfiles (files starting with '.').
+- `s`: Toggle sort method in dired view.
 - `shift+=` (`+`): Create a new directory.
 - `ctrl+x =` or `shift+n` (`N`): Create a new file. Both keys perform the same action. Uses Quick Pick input if enabled.
 - `shift+r` (`R`): Rename the item under the cursor or move selected items to a new directory. Uses Quick Pick input if enabled.

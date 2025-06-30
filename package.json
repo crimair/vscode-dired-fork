@@ -2,7 +2,7 @@
   "name": "vscode-dired-fork",
   "displayName": "vscode-dired-fork",
   "description": "Forked dired(File Manager) for VSCode, like Emacs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "crimair",
   "license": "Apache-2.0",
   "repository": {
@@ -39,83 +39,92 @@
       {
         "command": "extension.dired.pathLevelUp",
         "title": "Remove one path level (for autocompletedInputBox)"
+      },
+      {
+        "command": "extension.dired.toggleSort",
+        "title": "Toggle Sort Method"
       }
     ],
     "keybindings": [
       {
+        "key": "s",
+        "command": "extension.dired.toggleSort",
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+      },
+      {
         "key": ".",
         "command": "extension.dired.toggleDotFiles",
-        "when": "dired.open && editorTextFocus && !inDebugRepl"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "ctrl+x f",
         "command": "extension.dired.open",
-        "when": "dired.open && editorTextFocus && !inDebugRepl"
+        "when": "editorTextFocus && !inDebugRepl"
       },
       {
         "key": "enter",
         "command": "extension.dired.enter",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+=",
         "command": "extension.dired.createDir",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "ctrl+x =",
         "command": "extension.dired.createFile",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+n",
         "command": "extension.dired.createFile",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+r",
         "command": "extension.dired.rename",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+d",
         "command": "extension.dired.delete",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+c",
         "command": "extension.dired.copy",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+b",
         "command": "extension.dired.goUpDir",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "m",
         "command": "extension.dired.select",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "u",
         "command": "extension.dired.unselect",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "shift+u",
         "command": "extension.dired.unselectAll",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "g",
         "command": "extension.dired.refresh",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "q",
         "command": "extension.dired.close",
-        "when": "dired.open && editorLangId == dired && !findWidgetVisible && !inQuickOpen"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
       },
       {
         "key": "ctrl+h",

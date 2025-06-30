@@ -172,7 +172,7 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
             if (stat.isDirectory()) {
                 provider.openDir(selectedPath);
             } else if (stat.isFile()) {
-                const f = new FileItem(selectedPath, "", false, true); // Incomplete FileItem just to get URI.
+                const f = new FileItem(selectedPath, "", null, false, true); // Incomplete FileItem just to get URI.
                 const uri = f.uri;
                 if (uri) {
                     provider.showFile(uri);
@@ -188,6 +188,17 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
     });
     const commandToggleDotFiles = vscode.commands.registerCommand("extension.dired.toggleDotFiles", () => {
         provider.toggleDotFiles();
+    });
+
+    const commandToggleSort = vscode.commands.registerCommand("extension.dired.toggleSort", () => {
+        console.log("toggleSort command executed.");
+        console.log("Context Keys:");
+        vscode.commands.executeCommand('workbench.action.inspectContextKeys').then(() => {
+            // Inspect Context Keys コマンドは、UIに表示するだけで、直接ログには出力しません。
+            // そのため、手動で確認していただく必要があります。
+            console.log("Please check the 'Inspect Context Keys' overlay in VS Code.");
+        });
+        provider.toggleSort();
     });
 
     const commandCreateDir = vscode.commands.registerCommand("extension.dired.createDir", async () => {
@@ -413,6 +424,7 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
         commandOpen,
         commandEnter,
         commandToggleDotFiles,
+        commandToggleSort, // Add this line
         commandCreateDir,
         commandCreateFile,
         commandRename,

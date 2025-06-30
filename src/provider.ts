@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import FileItem from './fileItem';
+import FileItem, { SortOrder } from './fileItem';
 import * as autoBox from './autocompletedInputBox'
 
 const FIXED_URI: vscode.Uri = vscode.Uri.parse('dired://fixed_window');
@@ -19,6 +19,7 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
     private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
     private _fixed_window: boolean;
     private _show_dot_files: boolean = true;
+    private _sortOrder: SortOrder = SortOrder.Alphabetical;
     private _buffers: string[]; // This is a temporary buffer. Reused by multiple tabs.
 
     constructor(fixed_window: boolean) {
@@ -29,11 +30,14 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
             const doc = editor.document;
             if (doc && doc.uri.scheme === DiredProvider.scheme) {
                 const dirLine = doc.lineAt(0).text;
-                const dir = dirLine.endsWith(":") ? dirLine.slice(0, -1) : dirLine;
-                const line = editor.selection.active.line;
-                // 0行目（ヘッダ）は除外
-                if (line > 0) {
-                    this._cursorPositions[dir] = line;
+                const match = dirLine.match(/^([^:]+):/);
+                if (match) {
+                    const dir = match[1];
+                    const line = editor.selection.active.line;
+                    // 0行目（ヘッダ）は除外
+                    if (line > 0) {
+                        this._cursorPositions[dir] = line;
+                    }
                 }
             }
         });
@@ -57,12 +61,17 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
             return undefined;
         }
         const line0 = doc.lineAt(0).text;
-        const dir = line0.substring(0, line0.length - 1);
-        return dir;
+        const match = line0.match(/^([^:]+):/);
+        return match ? match[1] : undefined;
     }
 
     toggleDotFiles() {
         this._show_dot_files = !this._show_dot_files;
+        this.reload();
+    }
+
+    toggleSort() {
+        this._sortOrder = (this._sortOrder + 1) % 4; // Cycle through SortOrder enum
         this.reload();
     }
 
@@ -472,7 +481,7 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
     }
 
     openDir(path: string) {
-        const f = new FileItem(path, "", true); // Incomplete FileItem just to get URI.
+        const f = new FileItem(path, "", null, true); // Incomplete FileItem just to get URI.
         const uri = f.uri;
         if (uri) {
             this.createBuffer(path)
@@ -522,7 +531,7 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
 
     private get uri(): vscode.Uri {
         if (this.dirname) {
-            const f = new FileItem(this.dirname, "", true); // Incomplete FileItem just to get URI.
+            const f = new FileItem(this.dirname, "", null, true); // Incomplete FileItem just to get URI.
             const uri = f.uri;
             if (uri) {
                 return uri;
@@ -548,8 +557,9 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
                 }
             }
 
+            const sortOrderName = SortOrder[this._sortOrder];
             this._buffers = [
-                dirname + ":", // header line
+                `${dirname}: (Sort: ${sortOrderName})`, // header line
             ];
             this._buffers = this._buffers.concat(files.map((f) => f.line()));
 
@@ -558,8 +568,8 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
     }
 
     private readDir(dirname: string): FileItem[] {
-        const files = [".", ".."].concat(fs.readdirSync(dirname));
-        return <FileItem[]>files.map((filename) => {
+        const files = fs.readdirSync(dirname);
+        let fileItems = <FileItem[]>files.map((filename) => {
             const p = path.join(dirname, filename);
             try {
                 const stat = fs.statSync(p);
@@ -571,13 +581,41 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
         }).filter((fileItem) => {
             if (fileItem) {
                 if (this._show_dot_files) return true;
-                let filename = fileItem.fileName;
-                if (filename == '..' || filename == '.') return true;
-                return filename.substring(0, 1) != '.';
+                return fileItem.fileName.substring(0, 1) != '.';
             } else {
                 return false;
             }
         });
+
+        const dotItem = FileItem.create(dirname, ".", fs.statSync(dirname));
+        const dotDotItem = FileItem.create(dirname, "..", fs.statSync(path.join(dirname, "..")));
+
+        const dirs = fileItems.filter(item => item.stat && item.stat.isDirectory() && item.fileName !== '.' && item.fileName !== '..');
+        const filez = fileItems.filter(item => item.stat && !item.stat.isDirectory());
+
+        const sortFn = (a: FileItem, b: FileItem) => {
+            switch (this._sortOrder) {
+                case SortOrder.Mtime:
+                    return b.stat!.mtime.getTime() - a.stat!.mtime.getTime();
+                case SortOrder.Ext:
+                    return path.extname(a.fileName).localeCompare(path.extname(b.fileName));
+                case SortOrder.Size:
+                    // Directories have no size, so keep them alphabetical
+                    if (a.stat!.isDirectory() && b.stat!.isDirectory()) {
+                        return a.fileName.localeCompare(b.fileName);
+                    }
+                    return b.stat!.size - a.stat!.size;
+                case SortOrder.Alphabetical:
+                default:
+                    return a.fileName.localeCompare(b.fileName);
+            }
+        };
+
+        // Sort directories and files separately
+        dirs.sort(sortFn);
+        filez.sort(sortFn);
+
+        return [dotItem, dotDotItem].concat(dirs).concat(filez);
     }
 
     private getFile(): FileItem | null {

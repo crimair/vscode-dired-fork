@@ -9,12 +9,19 @@ import DiredProvider from './provider';
 import { IDResolver } from './idResolver';
 import { URL, pathToFileURL } from 'url';
 
+export enum SortOrder {
+    Alphabetical,
+    Mtime,
+    Ext,
+    Size
+}
 
 export default class FileItem {
 
     constructor(
         private _dirname: string,
         private _filename: string,
+        public stat: fs.Stats | null, // Make stat public and nullable
         private _isDirectory: boolean = false,
         private _isFile: boolean = true,
         private _username: string | undefined = undefined,
@@ -34,6 +41,7 @@ export default class FileItem {
         return new FileItem(
             dir,
             filename,
+            stats, // Pass stats to constructor
             mode.isDirectory(),
             mode.isFile(),
             FileItem._resolver.username(stats.uid),
@@ -106,6 +114,7 @@ export default class FileItem {
         return new FileItem(
             dir,
             filename,
+            null, // stat is not available here
             isDirectory,
             isFile,
             username || undefined,
