@@ -2,7 +2,7 @@
   "name": "vscode-dired-fork",
   "displayName": "vscode-dired-fork",
   "description": "Forked dired(File Manager) for VSCode, like Emacs",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "crimair",
   "license": "Apache-2.0",
   "repository": {
@@ -49,12 +49,12 @@
       {
         "key": "s",
         "command": "extension.dired.toggleSort",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": ".",
         "command": "extension.dired.toggleDotFiles",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "ctrl+x f",
@@ -64,67 +64,67 @@
       {
         "key": "enter",
         "command": "extension.dired.enter",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+=",
         "command": "extension.dired.createDir",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "ctrl+x =",
         "command": "extension.dired.createFile",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+n",
         "command": "extension.dired.createFile",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+r",
         "command": "extension.dired.rename",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+d",
         "command": "extension.dired.delete",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+c",
         "command": "extension.dired.copy",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+b",
         "command": "extension.dired.goUpDir",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "m",
         "command": "extension.dired.select",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "u",
         "command": "extension.dired.unselect",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "shift+u",
         "command": "extension.dired.unselectAll",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "g",
         "command": "extension.dired.refresh",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "q",
         "command": "extension.dired.close",
-        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress')"
+        "when": "dired.open && editorLangId == dired && editorTextFocus && !findWidgetVisible && !inQuickOpen && !(vim.mode == 'CommandlineInProgress') && !(vim.mode == 'SearchInProgressMode')"
       },
       {
         "key": "ctrl+h",
