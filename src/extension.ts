@@ -191,13 +191,6 @@ export function activate(context: vscode.ExtensionContext): ExtensionInternal {
     });
 
     const commandToggleSort = vscode.commands.registerCommand("extension.dired.toggleSort", () => {
-        console.log("toggleSort command executed.");
-        console.log("Context Keys:");
-        vscode.commands.executeCommand('workbench.action.inspectContextKeys').then(() => {
-            // Inspect Context Keys コマンドは、UIに表示するだけで、直接ログには出力しません。
-            // そのため、手動で確認していただく必要があります。
-            console.log("Please check the 'Inspect Context Keys' overlay in VS Code.");
-        });
         provider.toggleSort();
     });
 

@@ -47,10 +47,10 @@ export default class FileItem {
             FileItem._resolver.username(stats.uid),
             FileItem._resolver.groupname(stats.gid),
             stats.size,
-            stats.ctime.getMonth()+1,
-            stats.ctime.getDate(),
-            stats.ctime.getHours(),
-            stats.ctime.getMinutes(),
+            stats.mtime.getMonth()+1,
+            stats.mtime.getDate(),
+            stats.mtime.getHours(),
+            stats.mtime.getMinutes(),
             mode.toString(),
             false);
     }

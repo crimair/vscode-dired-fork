@@ -204,14 +204,17 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
 
                 if (sourceStats.isDirectory()) {
                     // Copy directory recursively
-                    fs.cpSync(sourcePath, finalTargetPath, { recursive: true });
+                    fs.cpSync(sourcePath, finalTargetPath, { recursive: true, preserveTimestamps: true }); // タイムスタンプ維持
                 } else {
                     // Copy file
                     const targetDir = path.dirname(finalTargetPath);
                     if (!fs.existsSync(targetDir)) {
                          fs.mkdirSync(targetDir, { recursive: true });
                     }
-                    fs.copyFileSync(sourcePath, finalTargetPath);
+                        fs.copyFileSync(sourcePath, finalTargetPath);
+                        // タイムスタンプ維持
+                        const srcStat = fs.statSync(sourcePath);
+                        fs.utimesSync(finalTargetPath, srcStat.atime, srcStat.mtime);
                 }
                 vscode.window.showInformationMessage(`${f.fileName} is copied to ${finalTargetPath}`);
             } catch (err: any) {
@@ -256,9 +259,12 @@ export default class DiredProvider implements vscode.TextDocumentContentProvider
                 try {
                     const sourceStats = fs.statSync(sourcePath);
                     if (sourceStats.isDirectory()) {
-                        fs.cpSync(sourcePath, finalTargetPath, { recursive: true });
+                        fs.cpSync(sourcePath, finalTargetPath, { recursive: true, preserveTimestamps: true }); // タイムスタンプ維持
                     } else {
                         fs.copyFileSync(sourcePath, finalTargetPath);
+                        // タイムスタンプ維持
+                        const srcStat = fs.statSync(sourcePath);
+                        fs.utimesSync(finalTargetPath, srcStat.atime, srcStat.mtime);
                     }
                     successCount++;
                 } catch (err: any) {
