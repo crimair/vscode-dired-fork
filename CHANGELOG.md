@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2026-01-21
+
+### Changed
+- Diredのmtime列(更新日時)の表示仕様をEmacs diredと同様に変更：
+  - ファイル更新日時が今年の場合は「月 日 時:分」、今年以外は「月 日 年」(年はスペース＋4桁: " 2025" のように表示)
+  - 表で時刻・年の桁数が揃い、可読性が向上
+
 ## [0.1.6]
 
 ### Changed

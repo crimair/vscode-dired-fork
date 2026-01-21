@@ -32,6 +32,7 @@ export default class FileItem {
         private _hour: number = 0,
         private _min: number = 0,
         private _modeStr: string | undefined = undefined,
+        private _year: number = 1970,
         private _selected: boolean = false) {}
 
     static _resolver = new IDResolver();
@@ -52,6 +53,7 @@ export default class FileItem {
             stats.mtime.getHours(),
             stats.mtime.getMinutes(),
             mode.toString(),
+            stats.mtime.getFullYear(),
             false);
     }
 
@@ -82,7 +84,12 @@ export default class FileItem {
         if (this._selected) {
             se = "*";
         }
-        return `${se} ${this._modeStr} ${u} ${g} ${size} ${month} ${day} ${hour}:${min} ${this._filename}`;
+        const currentYear = (new Date()).getFullYear();
+if (this._year !== currentYear) {
+    return `${se} ${this._modeStr} ${u} ${g} ${size} ${month} ${day} ${' ' + this._year} ${this._filename}`;
+} else {
+    return `${se} ${this._modeStr} ${u} ${g} ${size} ${month} ${day} ${hour}:${min} ${this._filename}`;
+}
     }
 
     public static parseLine(dir: string, line: string): FileItem {
@@ -125,6 +132,7 @@ export default class FileItem {
             hour,
             min,
             modeStr,
+            1970,
             isSelected);
     }
 
